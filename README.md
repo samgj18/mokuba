@@ -1,8 +1,8 @@
 # Mokuba
 
 [WIP] Mokuba is a simple, yet powerful CLI for password management, from creation to
-storing. The default way of storing your passwords will be in your local machine, however, integrations
-with famous storage services (i.e. Google Drive) are in the roadmap.
+storing. The default way of storing your passwords is in your local machine, however, integrations
+with cloud services are also available. 
 
 ## Installation
 
