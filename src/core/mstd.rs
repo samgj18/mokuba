@@ -10,23 +10,18 @@ Reads a line from stdin and returns it as a `Result<String, GetInputError>`
 ```
 use mokuba::read_line_from;
 
-fn main() {
-    let stdio = std::io::stdin();
-    let input = stdio.lock();
+let stdio = std::io::stdin();
+let input = stdio.lock();
 
-    let answer = read_line_from(input);
-    println!("was: {}", answer.unwrap());
-}
+let answer = read_line_from(input);
+println!("was: {}", answer.unwrap());
 ```
 */
 pub fn read_line_from<R: BufRead>(mut reader: R) -> Result<String, GetInputError> {
     let mut input = String::new();
     reader.read_line(&mut input).map_err(|e| {
         GetInputError::new(
-            &format!(
-                "Unable to read input properly with error: {}",
-                e.to_string()
-            ),
+            &format!("Unable to read input properly with error: {}", e),
             super::model::error::ErrorCode::UnableToReadInput,
         )
     })?;
@@ -41,21 +36,16 @@ Writes a line to stdout and returns it as a `Result<(), GetInputError>`
 ```
 use mokuba::write_line_to;
 
-fn main() {
-    let stdio = std::io::stdout();
-    let mut output = stdio.lock();
+let stdio = std::io::stdout();
+let mut output = stdio.lock();
 
-    write_line_to(&mut output, "Hello World!").unwrap();
-}
+write_line_to(&mut output, "Hello World!").unwrap();
 ```
 */
 pub fn write_line_to<W: Write>(mut writer: W, line: &str) -> Result<(), GetInputError> {
     writer.write_all(line.as_bytes()).map_err(|e| {
         GetInputError::new(
-            &format!(
-                "Unable to write input properly with error: {}",
-                e.to_string()
-            ),
+            &format!("Unable to write input properly with error: {}", e),
             super::model::error::ErrorCode::UnableToWriteOutput,
         )
     })?;
