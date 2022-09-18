@@ -3,9 +3,7 @@ name: Release
 on:
   workflow_run:
     workflows: ["Continuous Integration"]
-    push:
-      tags:
-        - "v*.*.*"
+    branches: [main]
     types: 
       - completed
 
