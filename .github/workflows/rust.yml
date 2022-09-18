@@ -39,3 +39,12 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: --workspace --all-features --all-targets -- -D warnings
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          LICENSE
+          mo*.*
