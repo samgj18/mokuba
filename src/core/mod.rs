@@ -26,7 +26,7 @@ pub fn gen_with_seed(params: Params, acc: &str) -> Result<String, GenError> {
 
     match from_u32(codepoint) {
         Some(value) => gen_with_seed(Params::new(params.length - 1), &format!("{}{}", acc, value)),
-        None => return Err(GenError::new("Unable to convert number to char")),
+        None => Err(GenError::new("Unable to convert number to char")),
     }
 }
 
