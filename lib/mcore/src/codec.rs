@@ -108,7 +108,7 @@ impl Codec<char> for char {
 
 impl<A: Display + FromStr> Codec<Vec<A>> for Vec<A> {
     fn encode(&self) -> String {
-        self.into_iter()
+        self.iter()
             .map(|a| a.to_string())
             .collect::<Vec<String>>()
             .join(" ")

@@ -1,4 +1,4 @@
-use std::io::{BufRead, Write};
+use std::io::{BufRead, Error, Write};
 
 use crate::model::error::GetInputError;
 
@@ -42,14 +42,13 @@ let mut output = stdio.lock();
 write_line_to(&mut output, "Hello World!").unwrap();
 ```
 */
-pub fn write_line_to<W: Write>(mut writer: W, line: &str) -> Result<(), GetInputError> {
+pub fn write_line_to<W: Write>(mut writer: W, line: &str) -> Result<(), Error> {
     writer.write_all(line.as_bytes()).map_err(|e| {
-        GetInputError::new(
-            super::model::error::ErrorCode::UnableToWriteOutput,
-            Some(&format!("Unable to write input properly with error: {}", e)),
+        Error::new(
+            std::io::ErrorKind::Other,
+            format!("Unable to write to stdout: {}", e),
         )
-    })?;
-    Ok(())
+    })
 }
 
 #[cfg(test)]

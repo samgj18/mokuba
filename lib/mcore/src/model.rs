@@ -1,7 +1,6 @@
 pub mod error {
-    use std::fmt::{Debug, Display, Formatter, Result};
-    extern crate proc_macro;
     use mmacro::{DisplayM, MokubaErrorM, VariantM};
+    use std::fmt::{Debug, Display, Formatter, Result};
 
     #[derive(Debug, PartialEq, Eq, DisplayM, VariantM)]
     pub enum ErrorCode {
@@ -12,6 +11,7 @@ pub mod error {
         UnableToParseInput,
         UnableToEncodeT,
         UnableToDecodeT,
+        UnableToParseInputToT,
     }
 
     /// Generic error type for all errors that can occur in this crate.
@@ -37,6 +37,13 @@ pub mod error {
     // DecodeError is a custom error type for the input parser.
     #[derive(Debug, MokubaErrorM)]
     pub struct DecodeError {
+        pub code: ErrorCode,
+        pub cause: Option<String>,
+    }
+
+    // ParseError is a custom error type for the input parser.
+    #[derive(Debug, MokubaErrorM)]
+    pub struct ParseError {
         pub code: ErrorCode,
         pub cause: Option<String>,
     }

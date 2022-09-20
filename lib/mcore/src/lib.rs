@@ -2,8 +2,10 @@ use model::error::ErrorCode::{LengthMustBeGreaterThanZero, UnableToConvertNumber
 use model::{error::GenError, params::PassParams};
 
 pub mod codec;
+pub mod executable;
 pub mod model;
 pub mod mstd;
+pub mod parser;
 
 /**
 
