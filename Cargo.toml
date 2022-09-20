@@ -4,13 +4,13 @@ version = "0.0.1"
 edition = "2021"
 authors = ["Samuel G <samgj_18@hotmail.com>"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-rand = "0.8.4"
-
 [[bin]]
 name = "mo"
 path = "src/bin.rs"
 
-[dev-dependencies]
+[dependencies]
+mcore = { path = "lib/mcore" }
+mmacro = { path = "lib/mmacro" }
+
+[workspace]
+members = ["lib/mcore", "lib/mmacro"]

@@ -1,10 +1,26 @@
-use crate::core::model::{
-    error::{
-        ErrorCode::{LengthMustBeGreaterThanZero, UnableToConvertNumberToChar},
-        GenError,
-    },
-    params::PassParams,
-};
+use model::error::ErrorCode::{LengthMustBeGreaterThanZero, UnableToConvertNumberToChar};
+use model::{error::GenError, params::PassParams};
+
+pub mod codec;
+pub mod model;
+pub mod mstd;
+pub mod parser;
+
+/**
+
+## Password Generator
+
+### Examples
+```
+use mcore::{gen, model::params::PassParams};
+let password = gen(PassParams { length: 10 });
+```
+
+This function will return an error if the length is less than 1 or if the acc seed is different than an empty string.
+*/
+pub fn gen(params: PassParams) -> Result<String, GenError> {
+    gen_with_seed(params, "")
+}
 
 /**
 
@@ -17,7 +33,7 @@ use crate::core::model::{
 This function will return an error if the length is less than 1 or if the acc seed is different than an empty string.
 
 */
-pub fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
+fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
     use rand::{thread_rng, Rng};
     use std::char::from_u32;
 
@@ -48,9 +64,9 @@ pub fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> 
     }
 }
 
+#[cfg(test)]
 mod tests {
-    #[cfg(test)]
-    use crate::core::{
+    use crate::{
         gen_with_seed, model::error::ErrorCode::LengthMustBeGreaterThanZero,
         model::params::PassParams,
     };
@@ -86,6 +102,3 @@ mod tests {
         assert!(result.unwrap().len() == 15 + test_seed.len());
     }
 }
-
-pub mod model;
-pub mod mstd;

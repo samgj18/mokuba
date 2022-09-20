@@ -1,0 +1,14 @@
+[package]
+name = "mmacro"
+version = "0.0.1"
+edition = "2021"
+authors = ["Samuel G <samgj_18@hotmail.com>"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0.100", features = ["full", "fold"] }
+quote = "1.0.21"
+trybuild = "1.0.64"
+proc-macro2 = { version = "1.0.43", default-features = false }

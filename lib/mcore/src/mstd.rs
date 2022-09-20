@@ -1,6 +1,6 @@
 use std::io::{BufRead, Write};
 
-use crate::core::model::error::GetInputError;
+use crate::model::error::GetInputError;
 
 /**
 Reads a line from stdin and returns it as a `Result<String, GetInputError>`
@@ -8,7 +8,7 @@ Reads a line from stdin and returns it as a `Result<String, GetInputError>`
 # Examples
 
 ```
-use mokuba::read_line_from;
+use mcore::mstd::read_line_from;
 
 let stdio = std::io::stdin();
 let input = stdio.lock();
@@ -21,8 +21,8 @@ pub fn read_line_from<R: BufRead>(mut reader: R) -> Result<String, GetInputError
     let mut input = String::new();
     reader.read_line(&mut input).map_err(|e| {
         GetInputError::new(
-            &format!("Unable to read input properly with error: {}", e),
             super::model::error::ErrorCode::UnableToReadInput,
+            Some(&format!("Unable to read input properly with error: {}", e)),
         )
     })?;
     Ok(input)
@@ -34,7 +34,7 @@ Writes a line to stdout and returns it as a `Result<(), GetInputError>`
 # Examples
 
 ```
-use mokuba::write_line_to;
+use mcore::mstd::write_line_to;
 
 let stdio = std::io::stdout();
 let mut output = stdio.lock();
@@ -45,8 +45,8 @@ write_line_to(&mut output, "Hello World!").unwrap();
 pub fn write_line_to<W: Write>(mut writer: W, line: &str) -> Result<(), GetInputError> {
     writer.write_all(line.as_bytes()).map_err(|e| {
         GetInputError::new(
-            &format!("Unable to write input properly with error: {}", e),
             super::model::error::ErrorCode::UnableToWriteOutput,
+            Some(&format!("Unable to write input properly with error: {}", e)),
         )
     })?;
     Ok(())
@@ -54,7 +54,7 @@ pub fn write_line_to<W: Write>(mut writer: W, line: &str) -> Result<(), GetInput
 
 #[cfg(test)]
 mod tests {
-    use crate::core::mstd::read_line_from;
+    use crate::mstd::read_line_from;
 
     #[test]
     fn test_read_line_from_in_memory_is_ok() {

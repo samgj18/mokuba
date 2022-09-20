@@ -2,7 +2,7 @@
 
 [WIP] Mokuba is a simple, yet powerful CLI for password management, from creation to
 storing. The default way of storing your passwords is in your local machine, however, integrations
-with cloud services are also available. 
+with cloud services are also available.
 
 ## Installation
 
@@ -24,6 +24,18 @@ Go to the project directory
 
 ```bash
   cd mokuba
+```
+
+Optionally, you can install nightly rust for proper macro IDE support:
+
+```bash
+  rustup install nightly && rustup default nightly && cargo check // cargo check is needed to forces macros to build
+```
+
+To go back to stable, run:
+
+```bash
+  rustup default stable
 ```
 
 Install [cargo watch](https://crates.io/crates/cargo-watch) for continuous compilation and the run:
