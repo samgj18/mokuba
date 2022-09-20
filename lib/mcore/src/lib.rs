@@ -4,7 +4,6 @@ use model::{error::GenError, params::PassParams};
 pub mod codec;
 pub mod model;
 pub mod mstd;
-pub mod parser;
 
 /**
 

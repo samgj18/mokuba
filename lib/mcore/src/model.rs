@@ -34,20 +34,6 @@ pub mod error {
         pub cause: Option<String>,
     }
 
-    // ParseError is a custom error type for the input parser.
-    #[derive(Debug, MokubaErrorM)]
-    pub struct ParseError {
-        pub code: ErrorCode,
-        pub cause: Option<String>,
-    }
-
-    // EncodeError is a custom error type for the input parser.
-    #[derive(Debug, MokubaErrorM)]
-    pub struct EncodeError {
-        pub code: ErrorCode,
-        pub cause: Option<String>,
-    }
-
     // DecodeError is a custom error type for the input parser.
     #[derive(Debug, MokubaErrorM)]
     pub struct DecodeError {
