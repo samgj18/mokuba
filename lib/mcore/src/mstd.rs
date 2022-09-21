@@ -22,7 +22,7 @@ pub fn read_line_from<R: BufRead>(mut reader: R) -> Result<String, GetInputError
     reader.read_line(&mut input).map_err(|e| {
         GetInputError::new(
             super::model::error::ErrorCode::UnableToReadInput,
-            Some(&format!("Unable to read input properly with error: {}", e)),
+            Some(format!("Unable to read input properly with error: {}", e)),
         )
     })?;
     Ok(input)

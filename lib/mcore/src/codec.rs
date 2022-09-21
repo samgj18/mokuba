@@ -16,7 +16,7 @@ pub trait Codec<A> {
         T: TryFrom<A>,
     {
         a.try_into().map_err(|_| -> DecodeError {
-            DecodeError::new(UnableToDecodeT, Some("Unable to decode T"))
+            DecodeError::new(UnableToDecodeT, Some("Unable to decode T".to_owned()))
         })
     }
 }
@@ -42,7 +42,7 @@ impl Codec<u32> for u32 {
 
     fn decode(s: String) -> Result<u32, DecodeError> {
         s.parse::<u32>().map_err(|_| -> DecodeError {
-            DecodeError::new(UnableToDecodeT, Some("Unable to decode T"))
+            DecodeError::new(UnableToDecodeT, Some("Unable to decode T".to_owned()))
         })
     }
 
@@ -58,7 +58,7 @@ impl Codec<u64> for u64 {
 
     fn decode(s: String) -> Result<u64, DecodeError> {
         s.parse::<u64>().map_err(|_| -> DecodeError {
-            DecodeError::new(UnableToDecodeT, Some("Unable to decode T"))
+            DecodeError::new(UnableToDecodeT, Some("Unable to decode T".to_owned()))
         })
     }
 
@@ -74,7 +74,7 @@ impl Codec<bool> for bool {
 
     fn decode(s: String) -> Result<bool, DecodeError> {
         s.parse::<bool>().map_err(|_| -> DecodeError {
-            DecodeError::new(UnableToDecodeT, Some("Unable to decode T"))
+            DecodeError::new(UnableToDecodeT, Some("Unable to decode T".to_owned()))
         })
     }
 
@@ -91,12 +91,12 @@ impl Codec<char> for char {
     fn decode(s: String) -> Result<char, DecodeError> {
         if s.len() == 1 {
             s.chars().next().ok_or_else(|| -> DecodeError {
-                DecodeError::new(UnableToDecodeT, Some("Unable to decode T"))
+                DecodeError::new(UnableToDecodeT, Some("Unable to decode T".to_owned()))
             })
         } else {
             Err(DecodeError::new(
                 UnableToDecodeT,
-                Some("Unable to decode T"),
+                Some("Unable to decode T".to_owned()),
             ))
         }
     }
@@ -118,7 +118,7 @@ impl<A: Display + FromStr> Codec<Vec<A>> for Vec<A> {
         s.split_whitespace()
             .map(|s| -> Result<A, DecodeError> {
                 s.parse::<A>().map_err(|_| -> DecodeError {
-                    DecodeError::new(UnableToDecodeT, Some("Unable to decode T"))
+                    DecodeError::new(UnableToDecodeT, Some("Unable to decode T".to_owned()))
                 })
             })
             .collect::<Result<Vec<A>, DecodeError>>()
@@ -128,7 +128,7 @@ impl<A: Display + FromStr> Codec<Vec<A>> for Vec<A> {
         s.split_whitespace()
             .map(|s| -> Result<A, DecodeError> {
                 s.parse::<A>().map_err(|_| -> DecodeError {
-                    DecodeError::new(UnableToDecodeT, Some("Unable to decode T"))
+                    DecodeError::new(UnableToDecodeT, Some("Unable to decode T".to_owned()))
                 })
             })
             .collect::<Result<Vec<A>, DecodeError>>()

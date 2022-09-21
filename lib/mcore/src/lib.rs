@@ -5,7 +5,6 @@ pub mod codec;
 pub mod executable;
 pub mod model;
 pub mod mstd;
-pub mod parser;
 
 /**
 
@@ -42,7 +41,7 @@ fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
         if acc.is_empty() {
             return Err(GenError::new(
                 LengthMustBeGreaterThanZero,
-                Some("Please choose a length greater than 0"),
+                Some("Please choose a length greater than 0".to_owned()),
             ));
         };
         return Ok(acc.to_string());
@@ -57,10 +56,7 @@ fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
         ),
         None => Err(GenError::new(
             UnableToConvertNumberToChar,
-            Some(&format!(
-                "Unable to convert codepoint:{} to char",
-                codepoint
-            )),
+            Some(format!("Unable to convert codepoint:{} to char", codepoint)),
         )),
     }
 }

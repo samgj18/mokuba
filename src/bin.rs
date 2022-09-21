@@ -1,7 +1,6 @@
 use command::Command;
-use mcore::executable::Executable;
+use mcore::executable::Execute;
 use mcore::mstd::{read_line_from, write_line_to};
-use mcore::parser::Parser;
 use std::io::{stdin, stdout, Error, ErrorKind, Result as IOResult};
 
 pub mod command;
