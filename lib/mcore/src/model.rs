@@ -3,7 +3,7 @@ pub mod error {
     use std::fmt::Debug;
     use std::io::Error;
 
-    #[derive(Debug, PartialEq, Eq, DisplayM)]
+    #[derive(Debug, PartialEq, Eq, DisplayM, VariantM)]
     pub enum ErrorCode {
         LengthMustBeGreaterThanZero,
         UnableToConvertNumberToChar,

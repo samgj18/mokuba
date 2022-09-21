@@ -156,15 +156,9 @@ pub fn derive_parser(input: TokenStream) -> TokenStream {
             let gen = quote! {
                 impl #name {
                     pub fn parse(input: &str) -> std::result::Result<#name, String> {
-                        let bin_name = std::env::var("CARGO_PKG_NAME")
-                            .unwrap_or_else(|_| "".to_string());
                         match input.trim() {
                             #(#variants_lower => Ok(#name::#variants),)*
-                            _ => Err(format!("
-Usage: {} [OPTION]...
-Search for PATTERNS in each FILE.
-Example: {} -p 16
-Unknown command: {}", bin_name, bin_name, input)
+                            _ => Err(format!("Unknown input {}", input)
                             ),
                         }
                     }
