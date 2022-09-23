@@ -19,28 +19,28 @@ pub mod error {
     #[derive(Debug, ErrorM, DisplayM, ConstructorM)]
     pub struct GenError {
         pub code: ErrorCode,
-        pub cause: Option<String>,
+        pub cause: String,
     }
 
     // InputError is a custom error type for the input parser.
     #[derive(Debug, ErrorM, DisplayM, ConstructorM)]
     pub struct GetInputError {
         pub code: ErrorCode,
-        pub cause: Option<String>,
+        pub cause: String,
     }
 
     // DecodeError is a custom error type for the input parser.
     #[derive(Debug, ErrorM, DisplayM, ConstructorM)]
     pub struct DecodeError {
         pub code: ErrorCode,
-        pub cause: Option<String>,
+        pub cause: String,
     }
 
     // ParseError is a custom error type for the input parser.
     #[derive(Debug, ErrorM, DisplayM, ConstructorM)]
     pub struct ParseError {
         pub code: ErrorCode,
-        pub cause: Option<String>,
+        pub cause: String,
     }
 }
 

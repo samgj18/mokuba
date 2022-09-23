@@ -1,6 +1,7 @@
 use model::error::ErrorCode::{LengthMustBeGreaterThanZero, UnableToConvertNumberToChar};
 use model::{error::GenError, params::PassParams};
 
+pub mod algebra;
 pub mod codec;
 pub mod executable;
 pub mod model;
@@ -41,7 +42,7 @@ fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
         if acc.is_empty() {
             return Err(GenError::new(
                 LengthMustBeGreaterThanZero,
-                Some("Please choose a length greater than 0".to_owned()),
+                "Please choose a length greater than 0".to_owned(),
             ));
         };
         return Ok(acc.to_string());
@@ -56,7 +57,7 @@ fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
         ),
         None => Err(GenError::new(
             UnableToConvertNumberToChar,
-            Some(format!("Unable to convert codepoint:{} to char", codepoint)),
+            format!("Unable to convert codepoint:{} to char", codepoint),
         )),
     }
 }
