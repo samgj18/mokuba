@@ -1,9 +1,13 @@
+pub mod cmd;
+pub mod cmds;
 pub mod codec;
 pub mod error;
-pub mod executable;
 pub mod param;
 
+use std::collections::HashMap;
 use std::io::{BufRead, Error, Write};
+
+use mmacro::ConstructorM;
 
 use self::error::ErrorCode::UnableToReadInput;
 use self::error::GetInputError;
@@ -55,6 +59,69 @@ pub fn write_line_to<W: Write>(mut writer: W, line: &str) -> Result<(), Error> {
             format!("Unable to write to stdout: {}", e),
         )
     })
+}
+
+/**
+Prepares a command by splitting it into an `Input` type.
+
+# Examples
+
+```
+use mcore::mstd::prepare;
+use std::collections::HashMap;
+
+let input = "generate --password --url www.google.com --username test".to_string();
+let command = prepare(&input);
+assert_eq!(command.as_ref().unwrap().arg, "generate");
+assert_eq!(
+    command.as_ref().unwrap().params.get("--password").unwrap(),
+    ""
+);
+assert_eq!(
+    command.as_ref().unwrap().params.get("--url").unwrap(),
+    "www.google.com"
+);
+assert_eq!(command.unwrap().params.get("--username").unwrap(), "test");
+```
+*/
+pub fn prepare(args_vec: &str) -> Result<Input, String> {
+    // this function should be able to take an input like: generate --password 1234 --url www.google.com --user test and
+    // return an Input struct like this: Input { command: "generate", params: { "--password": "1234", "--url": "www.google.com", "--user": "test" } }
+
+    let mut iter = args_vec.split_whitespace();
+    let command = iter.next().unwrap_or_default();
+
+    // generate --password --url www.google.com --username test
+    let mut params = std::collections::HashMap::new();
+    let mut key = String::new();
+    let mut value = String::new();
+
+    for arg in iter {
+        if arg.starts_with("--") || arg.starts_with('-') {
+            if !key.is_empty() {
+                params.insert(key, value);
+            }
+            key = arg.to_string();
+            value = String::new();
+        } else {
+            value = arg.to_string();
+        }
+    }
+
+    if !key.is_empty() {
+        params.insert(key, value);
+    }
+
+    Ok(Input {
+        arg: command.to_string(),
+        params,
+    })
+}
+
+#[derive(Debug, ConstructorM)]
+pub struct Input {
+    pub arg: String,
+    pub params: HashMap<String, String>,
 }
 
 #[cfg(test)]

@@ -7,7 +7,7 @@ use mstd::{
         ErrorCode::{LengthMustBeGreaterThanZero, UnableToConvertNumberToChar},
         GenError,
     },
-    param::PassParams,
+    param::GenerateParams,
 };
 /**
 
@@ -15,13 +15,13 @@ use mstd::{
 
 ### Examples
 ```
-use mcore::{gen, mstd::param::PassParams};
-let password = gen(PassParams { length: 10 });
+use mcore::{gen, mstd::param::GenerateParams};
+let password = gen(GenerateParams { length: 10 });
 ```
 
 This function will return an error if the length is less than 1 or if the acc seed is different than an empty string.
 */
-pub fn gen(params: PassParams) -> Result<String, GenError> {
+pub fn gen(params: GenerateParams) -> Result<String, GenError> {
     gen_with_seed(params, "")
 }
 
@@ -29,14 +29,14 @@ pub fn gen(params: PassParams) -> Result<String, GenError> {
 
 ### Arguments
 
-* `params` - `PassParams` struct containing the length of the password to generate
+* `params` - `GenerateParams` struct containing the length of the password to generate
 * `seed` - `String` containing the seed to use for the password generation
 
 ### Returns
 This function will return an error if the length is less than 1 or if the acc seed is different than an empty string.
 
 */
-fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
+fn gen_with_seed(params: GenerateParams, acc: &str) -> Result<String, GenError> {
     use rand::{thread_rng, Rng};
     use std::char::from_u32;
 
@@ -54,7 +54,7 @@ fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
 
     match from_u32(codepoint) {
         Some(value) => gen_with_seed(
-            PassParams::new(params.length - 1),
+            GenerateParams::new(params.length - 1),
             &format!("{}{}", acc, value),
         ),
         None => Err(GenError::new(
@@ -66,36 +66,36 @@ fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{gen_with_seed, LengthMustBeGreaterThanZero, PassParams};
+    use crate::{gen_with_seed, GenerateParams, LengthMustBeGreaterThanZero};
 
     #[test]
     fn produces_a_password_of_10_digits() {
-        let result = gen_with_seed(PassParams { length: 10 }, "");
+        let result = gen_with_seed(GenerateParams { length: 10 }, "");
         assert_eq!(result.unwrap().len(), 10);
     }
 
     #[test]
     fn produces_a_password_of_20_digits() {
-        let result = gen_with_seed(PassParams { length: 20 }, "");
+        let result = gen_with_seed(GenerateParams { length: 20 }, "");
         assert_eq!(result.unwrap().len(), 20);
     }
 
     #[test]
     fn produces_a_password_of_30_digits() {
-        let result = gen_with_seed(PassParams { length: 30 }, "");
+        let result = gen_with_seed(GenerateParams { length: 30 }, "");
         assert_eq!(result.unwrap().len(), 30);
     }
 
     #[test]
     fn produces_an_error_when_length_is_less_than_1() {
-        let result = gen_with_seed(PassParams { length: 0 }, "");
+        let result = gen_with_seed(GenerateParams { length: 0 }, "");
         assert!(result.unwrap_err().code == LengthMustBeGreaterThanZero);
     }
 
     #[test]
     fn produces_a_password_prepended_with_a_seed() {
         let test_seed = "test_seed";
-        let result = gen_with_seed(PassParams { length: 15 }, test_seed);
+        let result = gen_with_seed(GenerateParams { length: 15 }, test_seed);
         assert!(result.unwrap().len() == 15 + test_seed.len());
     }
 }

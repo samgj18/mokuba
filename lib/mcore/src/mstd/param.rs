@@ -1,12 +1,12 @@
 use mmacro::ConstructorM;
 
 #[derive(Debug, ConstructorM)]
-pub struct PassParams {
+pub struct GenerateParams {
     pub length: u32,
 }
 
-impl Default for PassParams {
+impl Default for GenerateParams {
     fn default() -> Self {
-        PassParams { length: 10 }
+        GenerateParams { length: 10 }
     }
 }
