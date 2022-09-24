@@ -1,16 +1,56 @@
-use crate::model::error::{DecodeError, ErrorCode::UnableToDecodeT};
 use std::{
     convert::{TryFrom, TryInto},
     fmt::Display,
     str::FromStr,
 };
 
+use super::error::{DecodeError, ErrorCode::UnableToDecodeT};
+
 pub trait Codec<A> {
+    /**
+    Encodes a value of type `A` into a `String`
+
+    # Examples
+
+    ```
+    use mcore::mstd::codec::Codec;
+
+    let str = "hello world".to_string();
+    assert_eq!(str.encode(), "hello world");
+    assert_eq!(Some("hello world".to_string()).unwrap(), str);
+    assert!(String::is(str));
+    ```
+    */
     fn encode(&self) -> String;
+
+    /**
+    Decodes a value of type `A` from a `String`
+
+    # Examples
+
+    ```
+    use mcore::mstd::codec::Codec;
+
+    assert!(bool::decode(Some("hello world")).is_err());
+    assert!(!bool::is("hello world".to_string()));
+    ```
+    */
     fn decode(s: Option<&str>) -> Result<A, DecodeError>;
+
+    /**
+    Checks if a value of type `A` is in fact the type `A`
+
+    # Examples
+
+    ```
+    use mcore::mstd::codec::Codec;
+
+    assert!(u64::is("42".to_string()));
+    assert!(!u64::is("hello world".to_string()));
+    ```
+    */
     fn is(s: String) -> bool;
 
-    // Create a function call _as with a generic type T which is a subtype of A and return the input as a T.
     fn _as<T>(&self, a: A) -> Result<T, DecodeError>
     where
         T: TryFrom<A>,
@@ -27,8 +67,19 @@ impl Codec<String> for String {
     }
 
     fn decode(s: Option<&str>) -> Result<String, DecodeError> {
-        s.map(|s| s.to_string())
-            .ok_or_else(|| DecodeError::new(UnableToDecodeT, "Unable to decode T".to_owned()))
+        match s {
+            Some(s) => match s.is_empty() {
+                true => Err(DecodeError::new(
+                    UnableToDecodeT,
+                    "Unable to decode T".to_owned(),
+                )),
+                false => Ok(s.to_string()),
+            },
+            None => Err(DecodeError::new(
+                UnableToDecodeT,
+                "Unable to decode T".to_owned(),
+            )),
+        }
     }
 
     fn is(_s: String) -> bool {
@@ -215,8 +266,6 @@ impl Codec<i32> for i32 {
     }
 }
 
-// write a blanket implementation to implement `Semigroup<Codec<A>>` for all types that also implement `Codec<A>`: `T`, `, T: Codec<A>`
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -310,5 +359,11 @@ mod tests {
     #[test]
     fn test_vec_of_strings_should_fail_when_not_a_vec_of_u32() {
         assert!(Vec::<u32>::decode(Some("hello world 42")).is_err());
+    }
+
+    #[test]
+    fn test_something() {
+        let asdas = "";
+        assert!(asdas.is_empty());
     }
 }

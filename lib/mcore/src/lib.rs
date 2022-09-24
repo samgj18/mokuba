@@ -1,19 +1,21 @@
-use model::error::ErrorCode::{LengthMustBeGreaterThanZero, UnableToConvertNumberToChar};
-use model::{error::GenError, params::PassParams};
-
 pub mod algebra;
-pub mod codec;
-pub mod executable;
-pub mod model;
 pub mod mstd;
+pub mod syntax;
 
+use mstd::{
+    error::{
+        ErrorCode::{LengthMustBeGreaterThanZero, UnableToConvertNumberToChar},
+        GenError,
+    },
+    param::PassParams,
+};
 /**
 
 ## Password Generator
 
 ### Examples
 ```
-use mcore::{gen, model::params::PassParams};
+use mcore::{gen, mstd::param::PassParams};
 let password = gen(PassParams { length: 10 });
 ```
 
@@ -64,10 +66,7 @@ fn gen_with_seed(params: PassParams, acc: &str) -> Result<String, GenError> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        gen_with_seed, model::error::ErrorCode::LengthMustBeGreaterThanZero,
-        model::params::PassParams,
-    };
+    use crate::{gen_with_seed, LengthMustBeGreaterThanZero, PassParams};
 
     #[test]
     fn produces_a_password_of_10_digits() {
