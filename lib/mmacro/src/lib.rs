@@ -6,7 +6,7 @@ use syn::{parse_macro_input, Data::Enum, DeriveInput};
 
 /// Derive constructor for any struct where the fields are from the type of the struct fields
 #[proc_macro_derive(ConstructorM)]
-pub fn derive_constructor(input: TokenStream) -> TokenStream {
+pub fn derive_constructor_mt(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = input.ident;
     let fields = match input.data {
@@ -16,20 +16,38 @@ pub fn derive_constructor(input: TokenStream) -> TokenStream {
     match fields {
         Ok(fields) => {
             let fields_types = fields.iter().clone().map(|f| f.ty.to_owned());
-            let field_n = fields.iter().clone().map(|f| f.ident.to_owned());
-            let field_p = field_n.clone();
+            let is_named = fields.iter().clone().map(|f| f.ident.is_some()).all(|x| x);
 
-            let gen = quote! {
-                impl #name {
-                    pub fn new(#(#field_n: #fields_types),*) -> #name {
-                        #name {
-                            #(#field_p),*
+            if is_named {
+                let field_n = fields.iter().clone().map(|f| f.ident.to_owned());
+                let field_p = field_n.clone();
+                let gen = quote! {
+                    impl #name {
+                        pub fn new(#(#field_n: #fields_types),*) -> #name {
+                            #name {
+                                #(#field_p),*
+                            }
                         }
                     }
-                }
-            };
+                };
+                TokenStream::from(gen)
+            } else {
+                let field_wo_n = fields
+                    .iter()
+                    .clone()
+                    .enumerate()
+                    .map(|(i, _)| syn::Ident::new(&format!("f{}", i), Span::call_site()));
 
-            TokenStream::from(gen)
+                let field_p = field_wo_n.clone();
+                let gen = quote! {
+                    impl #name {
+                        pub fn new(#(#field_wo_n: #fields_types),*) -> #name {
+                            Self(#(#field_p),*)
+                        }
+                    }
+                };
+                TokenStream::from(gen)
+            }
         }
         Err(e) => TokenStream::from(syn::Error::new(Span::call_site(), e).to_compile_error()),
     }
