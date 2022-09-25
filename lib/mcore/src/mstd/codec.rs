@@ -1,6 +1,6 @@
 use std::{
     convert::{TryFrom, TryInto},
-    fmt::Display,
+    fmt::{Debug, Display},
     str::FromStr,
 };
 
@@ -71,13 +71,13 @@ impl Codec<String> for String {
             Some(s) => match s.is_empty() {
                 true => Err(DecodeError::new(
                     UnableToDecodeT,
-                    "Unable to decode T".to_owned(),
+                    format!("Unable to decode {} to String", s),
                 )),
                 false => Ok(s.to_string()),
             },
             None => Err(DecodeError::new(
                 UnableToDecodeT,
-                "Unable to decode T".to_owned(),
+                "Unable to decode because the String is empty".to_owned(),
             )),
         }
     }
@@ -94,12 +94,15 @@ impl Codec<u32> for u32 {
 
     fn decode(s: Option<&str>) -> Result<u32, DecodeError> {
         match s {
-            Some(s) => s.parse::<u32>().map_err(|_| -> DecodeError {
-                DecodeError::new(UnableToDecodeT, "Unable to decode T".to_owned())
+            Some(s) => s.parse::<u32>().map_err(|e| -> DecodeError {
+                DecodeError::new(
+                    UnableToDecodeT,
+                    format!("Unable to decode {} to u32: {}", s, e),
+                )
             }),
             None => Err(DecodeError::new(
                 UnableToDecodeT,
-                "Unable to decode T".to_owned(),
+                "Unable to decode because the u32 is empty".to_owned(),
             )),
         }
     }
@@ -116,12 +119,15 @@ impl Codec<u64> for u64 {
 
     fn decode(s: Option<&str>) -> Result<u64, DecodeError> {
         match s {
-            Some(s) => s.parse::<u64>().map_err(|_| -> DecodeError {
-                DecodeError::new(UnableToDecodeT, "Unable to decode T".to_owned())
+            Some(s) => s.parse::<u64>().map_err(|e| -> DecodeError {
+                DecodeError::new(
+                    UnableToDecodeT,
+                    format!("Unable to decode {} to u64: {}", s, e),
+                )
             }),
             None => Err(DecodeError::new(
                 UnableToDecodeT,
-                "Unable to decode T".to_owned(),
+                "Unable to decode because the u64 is empty".to_owned(),
             )),
         }
     }
@@ -138,12 +144,15 @@ impl Codec<bool> for bool {
 
     fn decode(s: Option<&str>) -> Result<bool, DecodeError> {
         match s {
-            Some(s) => s.parse::<bool>().map_err(|_| -> DecodeError {
-                DecodeError::new(UnableToDecodeT, "Unable to decode T".to_owned())
+            Some(s) => s.parse::<bool>().map_err(|e| -> DecodeError {
+                DecodeError::new(
+                    UnableToDecodeT,
+                    format!("Unable to decode {} to bool: {}", s, e),
+                )
             }),
             None => Err(DecodeError::new(
                 UnableToDecodeT,
-                "Unable to decode T".to_owned(),
+                "Unable to decode because the bool is empty".to_owned(),
             )),
         }
     }
@@ -163,18 +172,18 @@ impl Codec<char> for char {
             Some(s) => {
                 if s.len() == 1 {
                     s.chars().next().ok_or_else(|| -> DecodeError {
-                        DecodeError::new(UnableToDecodeT, "Unable to decode T".to_owned())
+                        DecodeError::new(UnableToDecodeT, format!("Unable to decode {} to char", s))
                     })
                 } else {
                     Err(DecodeError::new(
                         UnableToDecodeT,
-                        "Unable to decode T".to_owned(),
+                        format!("Unable to decode {} to char", s),
                     ))
                 }
             }
             None => Err(DecodeError::new(
                 UnableToDecodeT,
-                "Unable to decode T".to_owned(),
+                "Unable to decode because the char is empty".to_owned(),
             )),
         }
     }
@@ -184,7 +193,7 @@ impl Codec<char> for char {
     }
 }
 
-impl<A: Display + FromStr> Codec<Vec<A>> for Vec<A> {
+impl<A: Display + FromStr + Debug> Codec<Vec<A>> for Vec<A> {
     fn encode(&self) -> String {
         self.iter()
             .map(|a| a.to_string())
@@ -198,14 +207,17 @@ impl<A: Display + FromStr> Codec<Vec<A>> for Vec<A> {
                 .split_whitespace()
                 .map(|s| -> Result<A, DecodeError> {
                     s.parse::<A>().map_err(|_| -> DecodeError {
-                        DecodeError::new(UnableToDecodeT, "Unable to decode T".to_owned())
+                        DecodeError::new(
+                            UnableToDecodeT,
+                            format!("Unable to decode {} to Vec<A>", s),
+                        )
                     })
                 })
                 .collect::<Result<Vec<A>, DecodeError>>(),
 
             None => Err(DecodeError::new(
                 UnableToDecodeT,
-                "Unable to decode T".to_owned(),
+                "Unable to decode because the Vec<A> is empty".to_owned(),
             )),
         }
     }

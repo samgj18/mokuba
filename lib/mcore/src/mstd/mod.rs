@@ -4,11 +4,10 @@ pub mod codec;
 pub mod error;
 pub mod param;
 
-use std::collections::HashMap;
 use std::io::{BufRead, Error, Write};
 
-use mmacro::ConstructorM;
-
+use self::cmd::{Execute, Input, Parse};
+use self::cmds::Generate;
 use self::error::ErrorCode::UnableToReadInput;
 use self::error::GetInputError;
 
@@ -62,16 +61,16 @@ pub fn write_line_to<W: Write>(mut writer: W, line: &str) -> Result<(), Error> {
 }
 
 /**
-Prepares a command by splitting it into an `Input` type.
+Deserializes a command by splitting it and turning it into an `Input` type.
 
 # Examples
 
 ```
-use mcore::mstd::prepare;
+use mcore::mstd::deserialize;
 use std::collections::HashMap;
 
 let input = "generate --password --url www.google.com --username test".to_string();
-let command = prepare(&input);
+let command = deserialize(&input);
 assert_eq!(command.as_ref().unwrap().arg, "generate");
 assert_eq!(
     command.as_ref().unwrap().params.get("--password").unwrap(),
@@ -84,12 +83,17 @@ assert_eq!(
 assert_eq!(command.unwrap().params.get("--username").unwrap(), "test");
 ```
 */
-pub fn prepare(args_vec: &str) -> Result<Input, String> {
+pub fn deserialize(args_vec: &str) -> Result<Input, String> {
     // this function should be able to take an input like: generate --password 1234 --url www.google.com --user test and
-    // return an Input struct like this: Input { command: "generate", params: { "--password": "1234", "--url": "www.google.com", "--user": "test" } }
+    // return an Input struct like this: Input { command: "generate", params: { "--password": "1234", "--user": "test" } }
+    // check that the first argument is not empty since it is required
 
     let mut iter = args_vec.split_whitespace();
     let command = iter.next().unwrap_or_default();
+
+    if command.is_empty() {
+        return Err("No command was provided".to_string());
+    }
 
     // generate --password --url www.google.com --username test
     let mut params = std::collections::HashMap::new();
@@ -118,10 +122,39 @@ pub fn prepare(args_vec: &str) -> Result<Input, String> {
     })
 }
 
-#[derive(Debug, ConstructorM)]
-pub struct Input {
-    pub arg: String,
-    pub params: HashMap<String, String>,
+/**
+This function is used to match the input to a command and execute it.
+
+# Examples
+
+```
+use mcore::mstd::matcher;
+use mcore::mstd::cmd::Input;
+use std::collections::HashMap;
+
+let input = Input {
+        arg: "generate".to_string(),
+        params: HashMap::from([
+            ("--password".to_string(), "".to_string()),
+            ("--username".to_string(), "test".to_string()),
+        ]),
+    };
+let command = matcher(&input);
+
+assert_eq!(command.unwrap().len(), 16);
+```
+*/
+pub fn matcher(input: &Input) -> Result<String, String> {
+    match input.arg.as_str() {
+        "generate" => {
+            let command = Generate;
+            match command.parse(input) {
+                Ok(params) => command.execute(Some(params)),
+                Err(e) => Err(e),
+            }
+        }
+        _ => Err(format!("Command {} not found", input.arg)),
+    }
 }
 
 #[cfg(test)]
@@ -152,5 +185,70 @@ mod tests {
 
         assert!(answer.is_ok());
         assert_eq!(output, b"I'm George");
+    }
+
+    #[test]
+    fn test_prepare_input_is_ok() {
+        let input = "generate --password --url www.google.com --username test";
+        let command = super::deserialize(input);
+
+        assert!(command.is_ok());
+        assert_eq!(command.as_ref().unwrap().arg, "generate");
+        assert_eq!(
+            command.as_ref().unwrap().params.get("--password").unwrap(),
+            ""
+        );
+        assert_eq!(
+            command.as_ref().unwrap().params.get("--url").unwrap(),
+            "www.google.com"
+        );
+        assert_eq!(command.unwrap().params.get("--username").unwrap(), "test");
+    }
+
+    #[test]
+    fn test_prepare_input_is_err_when_input_is_empty() {
+        let input = "";
+        let command = super::deserialize(input);
+
+        assert!(command.is_err());
+    }
+
+    #[test]
+    fn test_matcher_is_ok() {
+        use super::matcher;
+        use super::Input;
+        use std::collections::HashMap;
+
+        let input = Input {
+            arg: "generate".to_string(),
+            params: HashMap::from([
+                ("--password".to_string(), "".to_string()),
+                ("--username".to_string(), "test".to_string()),
+            ]),
+        };
+        let command = matcher(&input);
+        println!("{:?}", command);
+
+        assert!(command.is_ok());
+        assert_eq!(command.unwrap().len(), 16);
+    }
+
+    #[test]
+    fn test_matcher_is_err_when_input_is_empty() {
+        use super::matcher;
+        use super::Input;
+        use std::collections::HashMap;
+
+        let input = Input {
+            arg: "".to_string(),
+            params: HashMap::from([
+                ("--password".to_string(), "".to_string()),
+                ("--username".to_string(), "test".to_string()),
+            ]),
+        };
+        let command = matcher(&input);
+        println!("{:?}", command);
+
+        assert!(command.is_err());
     }
 }

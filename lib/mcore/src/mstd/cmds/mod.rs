@@ -1,6 +1,7 @@
+use crate::mstd::error::ErrorCode::UnableToParseInputToT;
 use std::collections::HashSet;
 
-use super::codec::Codec;
+use super::{cmd::Input, codec::Codec, error::GetInputError};
 use crate::gen;
 
 use super::{
@@ -9,21 +10,21 @@ use super::{
 };
 
 // Available commands
+#[derive(Debug, Copy, Clone)]
 pub struct Generate;
-pub struct Help;
 
 impl Execute<GenerateParams> for Generate {
     fn execute(&self, params: Option<GenerateParams>) -> Result<String, String> {
         match params {
             Some(p) => gen(p).map_err(|e| e.cause),
-            None => gen(GenerateParams::new(16)).map_err(|e| e.cause),
+            None => gen(GenerateParams::new(16, None)).map_err(|e| e.cause),
         }
     }
 }
 
 impl Argument for Generate {
-    fn short(&self) -> Option<char> {
-        Some('g')
+    fn short(&self) -> char {
+        'g'
     }
 
     fn argument(&self) -> String {
@@ -31,41 +32,53 @@ impl Argument for Generate {
     }
 
     fn is_valid_flag(key: &str) -> bool {
-        HashSet::from(["-p", "--password", "-w", "--website", "-u", "--username"]).contains(key)
+        HashSet::from(["-p", "--password", "-u", "--username"]).contains(key)
     }
 
     fn description(&self) -> String {
-        "Generate a password".to_string()
+        format!(
+            "{} {}: Generate a password with the given length and username. 
+            If no length is given, the default length is 16. 
+            If no username is given, only a password is generated. 
+            If a username is given, a password and a username are generated.
+            
+            Usage: generate --password Optional<{{}} --username <<{{}}>>>",
+            self.short(),
+            self.argument()
+        )
     }
 }
 
 impl Parse<GenerateParams> for Generate {
-    fn parse(s: Vec<&str>) -> Result<GenerateParams, String> {
-        // parsing first argument for fail fast approach
-        s.first().map_or_else(
-            || Err("No arguments provided".to_string()),
-            |s| {
-                let mut iter = s.split('=');
-                let key = iter.next();
-                let value = iter.next();
+    fn parse(&self, input: &Input) -> Result<GenerateParams, String> {
+        match validate(self, input) {
+            Ok(_) => (),
+            Err(e) => return Err(e.cause),
+        }
 
-                match (key, value) {
-                    (Some(v1), Some(v2)) => {
-                        if !Self::is_valid_flag(v1) {
-                            return Err(format!("Invalid flag: {}", v1));
-                        }
+        let option_password = input
+            .params
+            .get("-p")
+            .or_else(|| input.params.get("--password"));
 
-                        u32::decode(Some(v2))
-                            .map_err(|e| e.cause)
-                            .map(GenerateParams::new)
-                    }
-                    (Some(k), _) => Err(format!("Unknown key: {}", k)),
-                    (None, _) => Err("No key provided".to_string()),
-                }
-            },
-        )
+        let option_username = input
+            .params
+            .get("-u")
+            .or_else(|| input.params.get("--username"));
+
+        let password = u32::decode(option_password.map(|s| s.as_str()));
+        let username = String::decode(option_username.map(|s| s.as_str()));
+
+        match (password, username) {
+            (Ok(p), Ok(u)) => Ok(GenerateParams::new(p, Some(u))),
+            (Err(_), _) => Ok(GenerateParams::new(16, None)),
+            (_, Err(e)) => Err(e.cause),
+        }
     }
 }
+
+#[derive(Debug, Copy, Clone)]
+pub struct Help;
 
 impl Execute<()> for Help {
     fn execute(&self, _: Option<()>) -> Result<String, String> {
@@ -74,8 +87,8 @@ impl Execute<()> for Help {
 }
 
 impl Argument for Help {
-    fn short(&self) -> Option<char> {
-        Some('h')
+    fn short(&self) -> char {
+        'h'
     }
 
     fn argument(&self) -> String {
@@ -92,7 +105,41 @@ impl Argument for Help {
 }
 
 impl Parse<()> for Help {
-    fn parse(_: Vec<&str>) -> Result<(), String> {
+    fn parse(&self, _: &Input) -> Result<(), String> {
         Ok(())
     }
+}
+
+fn validate<C, P>(command: &C, input: &Input) -> Result<(), GetInputError>
+where
+    C: Parse<P> + Execute<P> + Argument,
+{
+    if input.arg.is_empty() {
+        return Err(GetInputError::new(
+            UnableToParseInputToT,
+            "No argument provided".to_string(),
+        ));
+    }
+
+    if input.arg != command.argument() {
+        return Err(GetInputError::new(
+            UnableToParseInputToT,
+            format!("Invalid argument: {}", input.arg),
+        ));
+    }
+
+    // check if an invalid flag is provided and return an error with the invalid flag
+    let invalid_flag = input
+        .params
+        .keys()
+        .find(|key| !C::is_valid_flag(key.as_str()));
+
+    if let Some(flag) = invalid_flag {
+        return Err(GetInputError::new(
+            UnableToParseInputToT,
+            format!("Invalid flag provided: {}", flag),
+        ));
+    }
+
+    Ok(())
 }

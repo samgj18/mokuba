@@ -1,4 +1,4 @@
-use mcore::mstd::{prepare, read_line_from, write_line_to};
+use mcore::mstd::{deserialize, matcher, read_line_from, write_line_to};
 use std::io::{stdin, stdout, Result as IOResult};
 
 fn main() -> IOResult<()> {
@@ -7,12 +7,13 @@ fn main() -> IOResult<()> {
     let writer = stdout();
 
     match read_line_from(reader) {
-        Ok(answer) => match prepare(&answer) {
+        Ok(answer) => match deserialize(&answer) {
             Ok(command) => {
-                // convert Vec<String> to Vec<&str>
-                println!("command: {:?}", command);
-
-                Ok(())
+                // TODO: Add help command to show all commands and their descriptions and help command per command
+                match matcher(&command) {
+                    Ok(input) => write_line_to(writer, &input),
+                    Err(error) => write_line_to(writer, &error),
+                }
             }
             Err(e) => write_line_to(writer, &e),
         },

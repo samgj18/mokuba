@@ -16,7 +16,7 @@ use mstd::{
 ### Examples
 ```
 use mcore::{gen, mstd::param::GenerateParams};
-let password = gen(GenerateParams { length: 10 });
+let password = gen(GenerateParams { length: 10, username: None });
 ```
 
 This function will return an error if the length is less than 1 or if the acc seed is different than an empty string.
@@ -54,7 +54,7 @@ fn gen_with_seed(params: GenerateParams, acc: &str) -> Result<String, GenError> 
 
     match from_u32(codepoint) {
         Some(value) => gen_with_seed(
-            GenerateParams::new(params.length - 1),
+            GenerateParams::new(params.length - 1, None),
             &format!("{}{}", acc, value),
         ),
         None => Err(GenError::new(
@@ -70,32 +70,32 @@ mod tests {
 
     #[test]
     fn produces_a_password_of_10_digits() {
-        let result = gen_with_seed(GenerateParams { length: 10 }, "");
+        let result = gen_with_seed(GenerateParams::new(10, None), "");
         assert_eq!(result.unwrap().len(), 10);
     }
 
     #[test]
     fn produces_a_password_of_20_digits() {
-        let result = gen_with_seed(GenerateParams { length: 20 }, "");
+        let result = gen_with_seed(GenerateParams::new(20, None), "");
         assert_eq!(result.unwrap().len(), 20);
     }
 
     #[test]
     fn produces_a_password_of_30_digits() {
-        let result = gen_with_seed(GenerateParams { length: 30 }, "");
+        let result = gen_with_seed(GenerateParams::new(30, None), "");
         assert_eq!(result.unwrap().len(), 30);
     }
 
     #[test]
     fn produces_an_error_when_length_is_less_than_1() {
-        let result = gen_with_seed(GenerateParams { length: 0 }, "");
+        let result = gen_with_seed(GenerateParams::new(0, None), "");
         assert!(result.unwrap_err().code == LengthMustBeGreaterThanZero);
     }
 
     #[test]
     fn produces_a_password_prepended_with_a_seed() {
         let test_seed = "test_seed";
-        let result = gen_with_seed(GenerateParams { length: 15 }, test_seed);
+        let result = gen_with_seed(GenerateParams::new(15, None), test_seed);
         assert!(result.unwrap().len() == 15 + test_seed.len());
     }
 }

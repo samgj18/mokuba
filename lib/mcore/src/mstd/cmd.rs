@@ -1,3 +1,7 @@
+use mmacro::ConstructorM;
+
+use std::collections::HashMap;
+
 pub static VERSION: &str = env!("CARGO_PKG_VERSION");
 pub static BIN_NAME: &str = env!("CARGO_PKG_NAME");
 pub static HELP: &str = concat!(
@@ -6,26 +10,25 @@ pub static HELP: &str = concat!(
     " [command] [options]\n",
 );
 
+#[derive(Debug, ConstructorM)]
+pub struct Input {
+    pub arg: String,
+    pub params: HashMap<String, String>,
+}
+
 pub trait Execute<P> {
     fn execute(&self, params: Option<P>) -> Result<String, String>;
 }
 
 pub trait Argument {
-    fn short(&self) -> Option<char>;
+    fn short(&self) -> char;
     fn argument(&self) -> String;
 
-    fn is_valid_flag(key: &str) -> bool;
     fn description(&self) -> String;
+
+    fn is_valid_flag(key: &str) -> bool;
 }
 
 pub trait Parse<O> {
-    fn parse(s: Vec<&str>) -> Result<O, String>;
+    fn parse(&self, s: &Input) -> Result<O, String>;
 }
-
-pub trait Command<C, P>
-where
-    C: Parse<P> + Execute<P> + Argument,
-{
-}
-
-impl<C, P> Command<C, P> for C where C: Execute<P> + Argument + Parse<P> {}

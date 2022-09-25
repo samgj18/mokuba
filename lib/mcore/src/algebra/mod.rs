@@ -41,6 +41,29 @@ impl Identity<bool> for bool {
     }
 }
 
+impl<T, E> Associativity<(T, E)> for (T, E)
+where
+    T: Associativity<T>,
+    E: Associativity<E>,
+{
+    fn associativity(lhs: (T, E), rhs: (T, E)) -> (T, E) {
+        (
+            T::associativity(lhs.0, rhs.0),
+            E::associativity(lhs.1, rhs.1),
+        )
+    }
+}
+
+impl<T, E> Identity<(T, E)> for (T, E)
+where
+    T: Identity<T>,
+    E: Identity<E>,
+{
+    fn identity() -> (T, E) {
+        (T::identity(), E::identity())
+    }
+}
+
 impl<T> Associativity<Vec<T>> for Vec<T> {
     fn associativity(lhs: Vec<T>, rhs: Vec<T>) -> Vec<T> {
         let mut v = lhs;
